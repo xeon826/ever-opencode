@@ -27,4 +27,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hermetic test suite: unit tests for extraction, identity, client, and
   injection, plus contract tests against a mock EverOS API.
 
-[0.1.0]: https://github.com/xeon826/everos-opencode/releases/tag/v0.1.0
+[0.1.0]: https://github.com/xeon826/ever-opencode/releases/tag/v0.1.0
