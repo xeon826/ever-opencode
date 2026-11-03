@@ -125,6 +125,7 @@ export async function setupPlugin(rawCtx: PluginContext): Promise<() => void> {
         episodes = await core.client.searchMemories(core.scopeBase.userId, query, {
           method: config.recallMethod,
           topK: config.topK,
+          scope: { appId: core.scopeBase.appId, projectId: core.scopeBase.projectId },
         });
       } catch (err) {
         await markDegraded(sessionID, err);

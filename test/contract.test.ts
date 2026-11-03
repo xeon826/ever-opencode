@@ -66,7 +66,10 @@ async function startFixture(): Promise<Fixture> {
         }
         fixture.counts.search++;
         reply(200, {
-          episodes: [{ summary: "likes terse replies", score: 0.8, atomic_facts: [], timestamp: Date.now() - 3600_000 }],
+          request_id: "r-search",
+          data: {
+            episodes: [{ summary: "likes terse replies", score: 0.8, atomic_facts: [], timestamp: Date.now() - 3600_000 }],
+          },
         });
         return;
       }

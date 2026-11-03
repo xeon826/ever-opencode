@@ -92,7 +92,10 @@ export class EverosClient {
 
   async flushMemory(
     scope: ScopeIds,
-    timeoutMs = 5000,
+    // Flush triggers synchronous server-side extraction (an LLM call plus
+    // parse + markdown write), so it needs a generous bound. Capture-path
+    // callers invoke it fire-and-forget; this only bounds the HTTP wait.
+    timeoutMs = 30000,
   ): Promise<{ status: string }> {
     const body = {
       session_id: scope.session_id,
@@ -111,21 +114,31 @@ export class EverosClient {
   async searchMemories(
     userId: string,
     query: string,
-    opts: { method?: string; topK?: number; timeoutMs?: number } = {},
+    opts: {
+      method?: string;
+      topK?: number;
+      timeoutMs?: number;
+      /** Scope narrowing — results never cross scopes (server default is "default"). */
+      scope?: { appId?: string; projectId?: string };
+    } = {},
   ): Promise<EverosEpisode[]> {
-    const body = {
+    const body: Record<string, unknown> = {
       user_id: userId,
       query,
       method: opts.method ?? "keyword",
       top_k: opts.topK ?? 5,
     };
-    const data = await this.request<{ episodes?: EverosEpisode[] }>(
+    if (opts.scope?.appId) body.app_id = opts.scope.appId;
+    if (opts.scope?.projectId) body.project_id = opts.scope.projectId;
+    const data = await this.request<{ data?: { episodes?: EverosEpisode[] } }>(
       "POST",
       "/api/v2/memory/search",
       body,
       opts.timeoutMs ?? 2000,
     );
-    return Array.isArray(data?.episodes) ? data.episodes : [];
+    // Success envelope: {request_id, data:{episodes:[...]}} — episodes never
+    // sit at the top level.
+    return Array.isArray(data?.data?.episodes) ? data.data!.episodes : [];
   }
 
   private async request<T>(

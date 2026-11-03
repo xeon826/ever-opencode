@@ -55,7 +55,7 @@ describe("EverosClient", () => {
 
   it("searchMemories posts user_id/query/method/top_k and returns episodes", async () => {
     const capture: { url?: string; init?: RequestInit } = {};
-    const client = new EverosClient("http://x", jsonFetch(200, { episodes: [{ summary: "s", score: 0.5 }] }, capture));
+    const client = new EverosClient("http://x", jsonFetch(200, { request_id: "r1", data: { episodes: [{ summary: "s", score: 0.5 }] } }, capture));
     const episodes = await client.searchMemories("dan", "query text", { method: "keyword", topK: 5 });
     expect(episodes).toHaveLength(1);
     const body = JSON.parse(capture.init!.body as string);
