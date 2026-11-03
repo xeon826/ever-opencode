@@ -1,4 +1,4 @@
-# everos-opencode
+# ever-opencode
 
 Persistent memory plugin for [OpenCode](https://docs.opencode.ai) V2, backed by a
 local [EverOS](https://pypi.org/project/everos/) server. Capture every turn,
@@ -60,7 +60,7 @@ Add it to your OpenCode config's `plugins` array:
 
 ```json
 {
-  "plugins": ["everos-opencode"]
+  "plugins": ["ever-opencode"]
 }
 ```
 
@@ -70,7 +70,7 @@ Or with options:
 {
   "plugins": [
     {
-      "package": "everos-opencode",
+      "package": "ever-opencode",
       "options": {
         "everosUrl": "http://127.0.0.1:8000",
         "flushEvery": 3,

@@ -1,4 +1,4 @@
-# AGENTS.md — everos-opencode
+# AGENTS.md — ever-opencode
 
 Persistent-memory plugin for OpenCode V2 backed by a local EverOS server.
 
@@ -22,7 +22,7 @@ progression.
 
 ## Configuration
 
-### Options (via `"plugins": [{ "package": "everos-opencode", "options": {...} }]`)
+### Options (via `"plugins": [{ "package": "ever-opencode", "options": {...} }]`)
 
 | Option        | Default                 | Meaning                                   |
 | ------------- | ----------------------- | ----------------------------------------- |

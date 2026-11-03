@@ -1,5 +1,5 @@
 {
-  "name": "everos-opencode",
+  "name": "ever-opencode",
   "version": "0.1.0",
   "description": "EverOS persistent memory plugin for OpenCode V2 — capture each turn, inject recall. Local-first, provider-neutral.",
   "type": "module",
