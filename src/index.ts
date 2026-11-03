@@ -16,6 +16,7 @@
  */
 
 import { EverosClient, EverosError, type EverosEpisode, type ScopeIds } from "./everos.js";
+
 import { extractTranscript, type TranscriptMessage } from "./extract.js";
 import { formatRecall } from "./inject.js";
 import { resolveScope } from "./identity.js";
@@ -101,16 +102,31 @@ export async function setupPlugin(rawCtx: PluginContext): Promise<() => void> {
 
       // Dedupe per user message: the context hook fires on every model call,
       // so the same user turn would otherwise trigger a search per call.
-      const messages: TranscriptMessage[] = Array.isArray(input.messages) ? input.messages : [];
-      const lastUser = [...messages].reverse().find((m) => m.type === "user");
+      // The context hook delivers daemon messages ({id, role, content}),
+      // while ctx.session.context delivers {id, type, text}. Read both.
+      const messages: any[] = Array.isArray(input.messages) ? (input.messages as any[]) : [];
+      const roleOf = (m: any) => (typeof m?.role === "string" ? m.role : m?.type);
+      const textOf = (m: any): string => {
+        if (typeof m?.text === "string") return m.text;
+        if (typeof m?.content === "string") return m.content;
+        if (Array.isArray(m?.content)) {
+          return m.content
+            .filter((p: any) => p?.type === "text" && typeof p.text === "string")
+            .map((p: any) => p.text)
+            .join("\n");
+        }
+        return "";
+      };
+      const isUser = (m: any) => roleOf(m) === "user";
+      const lastUser = [...messages].reverse().find(isUser);
       const userKey = typeof lastUser?.id === "string" ? lastUser.id : `noid:${messages.length}`;
       const dedupeKey = storageKeys.recall(sessionID, userKey);
       if (await rawCtx.storage.get(dedupeKey)) return;
       await rawCtx.storage.set(dedupeKey, true);
 
       const query = messages
-        .filter((m) => m.type === "user")
-        .map((m) => (typeof m.text === "string" ? m.text : ""))
+        .filter(isUser)
+        .map(textOf)
         .filter((t) => t.trim().length > 0)
         .slice(-3)
         .join(" ")

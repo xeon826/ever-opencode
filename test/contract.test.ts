@@ -135,6 +135,28 @@ describe("plugin contract (synthetic ctx + fixture EverOS server)", () => {
     fx.server.close();
   });
 
+  it("recall accepts daemon context-hook message shape (role/content)", async () => {
+    const fx = await startFixture();
+    const ctx = makeSyntheticCtx({ everosUrl: fx.url });
+    const cleanup = await setupPlugin(ctx as never);
+
+    // The daemon's context hook delivers {id, role, content} — unlike the
+    // {id, type, text} shape of ctx.session.context used by capture. This
+    // regression guards the e2e-found bug: shape mismatch silently produced
+    // an empty query and recall never fired.
+    const input = {
+      sessionID: "sess-dshape",
+      messages: [{ id: "dm1", role: "user", content: "how do tests run here?" }],
+      system: [] as Array<{ type: string; text: string }>,
+    };
+    await (ctx.session as any).hooks.context(input);
+
+    expect(fx.counts.search).toBe(1);
+    expect(input.system).toHaveLength(1);
+    expect(input.system[0].text).toContain("<everos-recall>");
+    await cleanup?.();
+  });
+
   it("recall dedupes per user message and injects one block", async () => {
     const fx = await startFixture();
     const ctx = makeSyntheticCtx({ everosUrl: fx.url });
