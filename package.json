@@ -1,7 +1,7 @@
 {
   "name": "ever-opencode",
   "version": "0.1.0",
-  "description": "EverOS persistent memory plugin for OpenCode V2 — capture each turn, inject recall. Local-first, provider-neutral.",
+  "description": "EverOS persistent memory plugin for OpenCode V2 \u2014 capture each turn, inject recall. Local-first, provider-neutral.",
   "type": "module",
   "license": "Apache-2.0",
   "main": "./dist/index.js",
@@ -30,5 +30,13 @@
     "@types/node": "^24.0.0",
     "typescript": "^5.7.0",
     "vitest": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xeon826/ever-opencode.git"
+  },
+  "homepage": "https://github.com/xeon826/ever-opencode#readme",
+  "bugs": {
+    "url": "https://github.com/xeon826/ever-opencode/issues"
   }
 }
