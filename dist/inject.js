@@ -1,0 +1,49 @@
+/**
+ * Recall formatting: EverOS episodes → compact system-prompt block.
+ * Empty input yields "" (caller skips injection entirely).
+ */
+function relativeDate(ts, now) {
+    if (typeof ts !== "number" || !Number.isFinite(ts) || ts <= 0)
+        return "";
+    const days = Math.floor((now - ts) / 86_400_000);
+    if (days <= 0)
+        return "today";
+    if (days === 1)
+        return "yesterday";
+    if (days < 30)
+        return `${days}d ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12)
+        return `${months}mo ago`;
+    return `${Math.floor(months / 12)}y ago`;
+}
+/**
+ * Render episodes as `- summary [score X (age)]` lines — the single
+ * representation shared by system-prompt recall and the agent tools.
+ * Empty input yields [].
+ */
+export function formatEpisodeLines(episodes, opts = {}) {
+    const top = episodes
+        .slice(0, Math.max(1, opts.topK ?? 5))
+        .filter((e) => typeof e?.summary === "string" && e.summary.trim().length > 0);
+    if (top.length === 0)
+        return [];
+    const now = opts.now ?? Date.now();
+    return top.map((e) => {
+        const date = relativeDate(e.timestamp, now);
+        const score = typeof e.score === "number" ? e.score.toFixed(2) : "?";
+        const dateSuffix = date.length > 0 ? ` (${date})` : "";
+        return `- ${e.summary.trim()} [score ${score}${dateSuffix}]`;
+    });
+}
+export function formatRecall(episodes, opts = {}) {
+    const lines = formatEpisodeLines(episodes, opts);
+    if (lines.length === 0)
+        return "";
+    return [
+        "<everos-recall>",
+        "Relevant memories from previous sessions (may be imperfect; verify before relying on them):",
+        ...lines,
+        "</everos-recall>",
+    ].join("\n");
+}

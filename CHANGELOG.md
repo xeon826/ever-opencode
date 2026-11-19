@@ -20,9 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `EVEROS_INTEGRATION=1`) — health → add → flush → search round-trip against
   a real EverOS server in a throwaway app scope; skips when the server is
   down. Ten new unit tests cover the tool surface.
-- Git-based installs: `prepare` script builds `dist/` on clone, so the plugin
-  installs straight from GitHub — `opencode plugin add
-  github:xeon826/ever-opencode#v0.2.0` — no npm registry required.
+- Git-based installs: `dist/` is committed, so the plugin installs straight
+  from GitHub with no build step or lifecycle scripts — `opencode plugin add
+  github:xeon826/ever-opencode#v0.2.0` — no npm registry required. (bun
+  blocks git-dep lifecycle scripts by default, so an install-time build is
+  not viable; committing the build output is the standard git-package
+  pattern.)
 
 ### Changed
 
