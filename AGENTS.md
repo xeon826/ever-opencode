@@ -63,6 +63,21 @@ defs, no SDK runtime import):
 Errors from the EverOS server surface as tool-result content (`everos_* failed: <code>: msg`),
 never as thrown tool errors.
 
+## Release / publish (npm stage flow)
+
+`npm publish` directly fails on this account: the npm token is a bypass-2FA granular token,
+which npm restricts to **staged** publishing (E_STAGE_REQUIRED), and the account's 2FA is a
+security key (no authenticator OTP). Release flow:
+
+1. `npm stage publish` — stages the tarball (no 2FA needed)
+2. Approve on npmjs.com → Settings → **Staged Packages** → Approve (security-key WebAuthn
+   prompt), or `npm stage approve` interactively
+3. OpenCode sessions pick the new `@latest` up after the opencode server restarts (it caches
+   the plugin registry and store install; `opencode run --standalone` bypasses for testing)
+
+`dist/` is committed (bun blocks git-dep lifecycle scripts, so installs must be script-free) —
+run `npm run build` and include `dist/` in the release commit.
+
 ## Dev sandbox (project-local testing)
 
 `~/git_clones/everos-sandbox/opencode.jsonc` loads this clone via a local `plugins` path entry
