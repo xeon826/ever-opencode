@@ -1,6 +1,6 @@
 {
   "name": "ever-opencode",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "EverOS persistent memory plugin for OpenCode V2 \u2014 capture each turn, inject recall. Local-first, provider-neutral.",
   "type": "module",
   "license": "Apache-2.0",
@@ -20,8 +20,9 @@
   },
   "scripts": {
     "build": "tsc",
+    "prepare": "npm run build",
     "test": "vitest run",
-    "test:integration": "echo 'integration harness not yet implemented (real EverOS server required)'"
+    "test:integration": "EVEROS_INTEGRATION=1 vitest run integration.live"
   },
   "dependencies": {
     "@opencode/plugin": "^2.2.5"

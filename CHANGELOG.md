@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-11-19
+
+### Added
+
+- Agent memory tools via OpenCode V2 `ctx.tool.transform` — the mem0-parity
+  gap: `everos_search` (on-demand server-side recall, project scope default,
+  `scope: "global"` widening, `top_k` clamp), `everos_add` (store one fact
+  now: deferred add + synchronous flush; search indexes may lag a few
+  seconds), and `everos_flush` (force extraction of the session's deferred
+  capture buffer). Server failures surface as tool-result content, never
+  thrown.
+- Live integration harness: `npm run test:integration` (gated behind
+  `EVEROS_INTEGRATION=1`) — health → add → flush → search round-trip against
+  a real EverOS server in a throwaway app scope; skips when the server is
+  down. Ten new unit tests cover the tool surface.
+- Git-based installs: `prepare` script builds `dist/` on clone, so the plugin
+  installs straight from GitHub — `opencode plugin add
+  github:xeon826/ever-opencode#v0.2.0` — no npm registry required.
+
+### Changed
+
+- Episode rendering extracted to `formatEpisodeLines` and shared by recall
+  injection and the tools (single representation).
+
+[0.2.0]: https://github.com/xeon826/ever-opencode/releases/tag/v0.2.0
+
 ## [0.1.0] - 2026-11-03
 
 ### Added
