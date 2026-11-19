@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-11-19
+
+### Fixed
+
+- `everos_search`: removed the `scope: "global"` option — it never worked. The
+  EverOS v2 search API pins `app_id`/`project_id` (defaults `"default"`) into
+  the store filter, so a request without narrowing searches an empty
+  partition; there is no cross-scope search mode server-side. The tool now
+  always narrows to the current project and says so in its description.
+
+[0.2.1]: https://github.com/xeon826/ever-opencode/releases/tag/v0.2.1
+
 ## [0.2.0] - 2026-11-19
 
 ### Added

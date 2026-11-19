@@ -95,16 +95,22 @@ describe("everos tools", () => {
     expect(out.content).toContain("[score 0.90");
   });
 
-  it("everos_search global drops scope narrowing; top_k clamps", async () => {
+  it("everos_search always narrows to the project scope; top_k clamps", async () => {
     const client = fakeClient();
     const tools = buildTools(deps(client));
     const search = tools.find((t) => t.name === "everos_search")!;
 
-    await search.execute({ query: "q", scope: "global", top_k: 99 }, { sessionID: "s" });
-    const [userId, , opts] = (client as any).calls.search[0];
-    expect(userId).toBe("dan");
-    expect(opts.scope).toBeUndefined();
-    expect(opts.topK).toBe(25);
+    // Regression: the v2 API pins app_id/project_id (defaults "default"/"default")
+    // into the store filter, so omitting either searches an empty partition.
+    // Narrowing must be sent on every call — there is no cross-scope mode.
+    await search.execute({ query: "q" }, { sessionID: "s" });
+    await search.execute({ query: "q", top_k: 99 }, { sessionID: "s" });
+
+    expect((client as any).calls.search).toHaveLength(2);
+    for (const [, , opts] of (client as any).calls.search) {
+      expect(opts.scope).toEqual({ appId: "opencode", projectId: "demo-repo" });
+    }
+    expect((client as any).calls.search[1][2].topK).toBe(25);
   });
 
   it("everos_search rejects an empty query without touching the client", async () => {

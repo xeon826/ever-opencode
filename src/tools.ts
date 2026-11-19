@@ -85,43 +85,42 @@ function makeSearchTool(deps: ToolDeps): EverosToolDef {
   return {
     name: "everos_search",
     description:
-      "Search the user's persistent EverOS memory (episodes + atomic facts from previous " +
-      "sessions). Use proactively when context from past work would help — prior decisions, " +
-      "preferences, debugging history. Results are ranked server-side (BM25/vector); each " +
-      "line carries a relevance score and age.",
+      "Search this project's persistent EverOS memory (episodes + atomic facts from previous " +
+      "sessions of this project). Use proactively when context from past work would help — " +
+      "prior decisions, preferences, debugging history. Results are ranked server-side " +
+      "(BM25/vector); each line carries a relevance score and age. Searches the current " +
+      "project's scope only — EverOS cannot search across projects.",
     input: {
       type: "object",
       properties: {
         query: { type: "string", description: "Free-text query, e.g. 'how did we fix the flaky login test'" },
         top_k: { type: "number", description: `Max results (1-25, default ${deps.defaultTopK})` },
-        scope: {
-          type: "string",
-          enum: ["project", "global"],
-          description: '"project" (memories from this project only, default) or "global" (all projects)',
-        },
       },
       required: ["query"],
     },
     async execute(rawInput, context) {
-      const input = (rawInput ?? {}) as { query?: unknown; top_k?: unknown; scope?: unknown };
+      const input = (rawInput ?? {}) as { query?: unknown; top_k?: unknown };
       const query = typeof input.query === "string" ? input.query.trim() : "";
       if (query.length === 0) {
         return { content: "everos_search failed: 'query' (non-empty string) is required." };
       }
-      const global = input.scope === "global";
       return guarded(deps, "everos_search", async () => {
+        const topK = clampTopK(input.top_k, deps.defaultTopK);
+        // Scope narrowing is mandatory: the server pins app_id/project_id (defaults
+        // "default"/"default") into the store filter, so omitting either searches an
+        // empty partition — there is no cross-scope mode in the v2 API.
         const episodes = await deps.client.searchMemories(deps.scopeBase.userId, query, {
           method: deps.recallMethod,
-          topK: clampTopK(input.top_k, deps.defaultTopK),
-          scope: global ? undefined : { appId: deps.scopeBase.appId, projectId: deps.scopeBase.projectId },
+          topK,
+          scope: { appId: deps.scopeBase.appId, projectId: deps.scopeBase.projectId },
         });
-        const lines = formatEpisodeLines(episodes, { topK: clampTopK(input.top_k, deps.defaultTopK) });
+        const lines = formatEpisodeLines(episodes, { topK });
         if (lines.length === 0) {
           return { content: `No memories found for: ${query}` };
         }
         return {
           content: [`EverOS memories (${lines.length}, may be imperfect):`, ...lines].join("\n"),
-          metadata: { sessionID: context.sessionID, scope: global ? "global" : "project", count: lines.length },
+          metadata: { sessionID: context.sessionID, scope: "project", count: lines.length },
         };
       });
     },

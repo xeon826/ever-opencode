@@ -109,7 +109,7 @@ agent can call on demand (same pattern as the mem0 plugin's memory tools):
 
 | Tool | What it does |
 | --- | --- |
-| `everos_search` | Query memory on demand — "what did we decide about X last month?" Search runs server-side (BM25/vector); results carry relevance scores and ages. Project scope by default, `scope: "global"` widens to all projects. |
+| `everos_search` | Query memory on demand — "what did we decide about X last month?" Search runs server-side (BM25/vector); results carry relevance scores and ages. Searches this project's memory only — EverOS cannot search across projects. |
 | `everos_add` | Store a durable fact immediately — add + synchronous extraction. Becomes searchable within a few seconds. |
 | `everos_flush` | Force extraction of the session's buffered conversation. |
 

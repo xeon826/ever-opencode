@@ -54,8 +54,9 @@ progression.
 Registered when the host exposes `ctx.tool` (see `src/tools.ts`; structural JSON-Schema tool
 defs, no SDK runtime import):
 
-- `everos_search` — on-demand recall: query episodes server-side (BM25/vector), project scope
-  by default, `scope: "global"` widens; `top_k` clamps 1–25
+- `everos_search` — on-demand recall: query episodes server-side (BM25/vector), always
+  narrowed to the current project scope (the v2 API pins app/project into the store filter —
+  there is no cross-scope mode); `top_k` clamps 1–25
 - `everos_add` — store one fact now: add (deferred) + synchronous flush; extraction is LLM-side,
   search indexes may lag the flush return by a few seconds (copy on the tool says so)
 - `everos_flush` — force extraction of the session's deferred capture buffer
