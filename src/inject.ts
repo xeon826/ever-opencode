@@ -16,22 +16,35 @@ function relativeDate(ts: number | undefined, now: number): string {
   return `${Math.floor(months / 12)}y ago`;
 }
 
-export function formatRecall(
+/**
+ * Render episodes as `- summary [score X (age)]` lines — the single
+ * representation shared by system-prompt recall and the agent tools.
+ * Empty input yields [].
+ */
+export function formatEpisodeLines(
   episodes: EverosEpisode[],
   opts: { topK?: number; now?: number } = {},
-): string {
+): string[] {
   const top = episodes
     .slice(0, Math.max(1, opts.topK ?? 5))
     .filter((e) => typeof e?.summary === "string" && e.summary.trim().length > 0);
-  if (top.length === 0) return "";
+  if (top.length === 0) return [];
 
   const now = opts.now ?? Date.now();
-  const lines = top.map((e) => {
+  return top.map((e) => {
     const date = relativeDate(e.timestamp, now);
     const score = typeof e.score === "number" ? e.score.toFixed(2) : "?";
     const dateSuffix = date.length > 0 ? ` (${date})` : "";
     return `- ${e.summary.trim()} [score ${score}${dateSuffix}]`;
   });
+}
+
+export function formatRecall(
+  episodes: EverosEpisode[],
+  opts: { topK?: number; now?: number } = {},
+): string {
+  const lines = formatEpisodeLines(episodes, opts);
+  if (lines.length === 0) return "";
 
   return [
     "<everos-recall>",

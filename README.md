@@ -56,21 +56,29 @@ curl http://127.0.0.1:8000/health   # → {"status":"ok"}
 
 ### 2. Install the plugin
 
-Add it to your OpenCode config's `plugins` array:
+From GitHub (no npm needed — one command, writes your global config):
+
+```sh
+opencode plugin add github:xeon826/ever-opencode#v0.2.0
+```
+
+`#v0.2.0` pins the release tag; `#main` tracks the branch (with update
+checks), and a full commit SHA pins exactly. Or add it to your OpenCode
+config's `plugins` array by hand:
 
 ```json
 {
-  "plugins": ["ever-opencode"]
+  "plugins": ["github:xeon826/ever-opencode#v0.2.0"]
 }
 ```
 
-Or with options:
+Also available on npm as `ever-opencode`. With options:
 
 ```json
 {
   "plugins": [
     {
-      "package": "ever-opencode",
+      "package": "github:xeon826/ever-opencode#v0.2.0",
       "options": {
         "everosUrl": "http://127.0.0.1:8000",
         "flushEvery": 3,
@@ -93,6 +101,17 @@ ls ~/.everos/opencode/<project>/users/<you>/episodes/
 ```
 
 Future sessions in the same project recall what happened in past ones.
+
+## Agent tools
+
+Beyond passive capture + recall injection, the plugin registers three tools the
+agent can call on demand (same pattern as the mem0 plugin's memory tools):
+
+| Tool | What it does |
+| --- | --- |
+| `everos_search` | Query memory on demand — "what did we decide about X last month?" Search runs server-side (BM25/vector); results carry relevance scores and ages. Project scope by default, `scope: "global"` widens to all projects. |
+| `everos_add` | Store a durable fact immediately — add + synchronous extraction. Becomes searchable within a few seconds. |
+| `everos_flush` | Force extraction of the session's buffered conversation. |
 
 ## EverOS `[llm]` provider matrix
 

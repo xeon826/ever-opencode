@@ -60,6 +60,21 @@ export interface VcsDomainLike {
   get(input?: Record<string, unknown>): Promise<unknown>;
 }
 
+/** Structural view of the V2 tool editor handed to `ctx.tool.transform`. */
+export interface ToolEditorLike {
+  add(tool: {
+    readonly name: string;
+    readonly description: string;
+    readonly input: Record<string, unknown>;
+    execute(input: unknown, context: { sessionID?: string }): Promise<{ content: string }>;
+  }): void;
+}
+
+/** Subset of `ctx.tool` (optional — absent on hosts without tool registration). */
+export interface ToolDomainLike {
+  transform(callback: (editor: ToolEditorLike) => void): Promise<RegistrationLike>;
+}
+
 /** Structural view of the V2 plugin setup context. */
 export interface PluginContext {
   readonly options: Readonly<Record<string, unknown>>;
@@ -72,4 +87,5 @@ export interface PluginContext {
   readonly event: EventDomainLike;
   readonly session: SessionDomainLike;
   readonly vcs?: VcsDomainLike;
+  readonly tool?: ToolDomainLike;
 }

@@ -21,6 +21,7 @@ import { extractTranscript, type TranscriptMessage } from "./extract.js";
 import { formatRecall } from "./inject.js";
 import { resolveScope } from "./identity.js";
 import { Logger, type LogLevel } from "./log.js";
+import { registerTools } from "./tools.js";
 import type { EverosOptions, PluginContext } from "./types.js";
 
 const DEFAULTS: Required<Omit<EverosOptions, "everosUrl">> & { everosUrl?: string } = {
@@ -246,12 +247,25 @@ export async function setupPlugin(rawCtx: PluginContext): Promise<() => void> {
     }, sessionID);
   });
 
+  // ---- Agent tools (everos_search / everos_add / everos_flush) ----------
+  // Optional domain: hosts without ctx.tool simply get no tools.
+  const toolsRegistration = core
+    ? await registerTools(rawCtx, {
+        client: core.client,
+        scopeBase: core.scopeBase,
+        recallMethod: config.recallMethod,
+        defaultTopK: config.topK,
+        log,
+      })
+    : undefined;
+
   // ---- Cleanup ----------------------------------------------------------
 
   return () => {
     controller.abort();
     void recallRegistration.dispose();
     void compactionRegistration.dispose();
+    void toolsRegistration?.dispose();
   };
 }
 
@@ -264,7 +278,8 @@ export type { EverosOptions, PluginContext } from "./types.js";
 export type { EverosEpisode, EverosMessage, EverosError } from "./everos.js";
 export { EverosClient } from "./everos.js";
 export { extractTranscript } from "./extract.js";
-export { formatRecall } from "./inject.js";
+export { formatRecall, formatEpisodeLines } from "./inject.js";
+export { buildTools, everosToolNames, registerTools } from "./tools.js";
 export { slugify, resolveIdentity } from "./identity.js";
 
 export default {
